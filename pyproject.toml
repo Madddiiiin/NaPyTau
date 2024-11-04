@@ -1,0 +1,20 @@
+[project]
+name = "napytau"
+version = "0.1.0"
+description = "A modern reimplementation of napatau"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "tk>=0.1.0",
+]
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project.optional-dependencies]
+dev = ["pytest"]
+
+[tool.tomlscript]
+run= "uv run napytau/main.py"
+test = "uv run pytest -rA"
