@@ -1,9 +1,10 @@
-from typing import List, Tuple
+from typing import List
 
 import tkinter as tk
 from tkinter import filedialog
 
 import customtkinter
+
 
 from napytau.cli.cli_arguments import CLIArguments
 
@@ -12,7 +13,12 @@ from napytau.gui.components.control_panel import ControlPanel
 from napytau.gui.components.graph import Graph
 from napytau.gui.components.logger import Logger
 from napytau.gui.components.menu_bar import MenuBar
-from napytau.gui.model.checkbox_datapoint import CheckboxDataPoint
+from napytau.gui.components.Toolbar import Toolbar
+
+from napytau.import_export.model.datapoint import Datapoint
+from napytau.import_export.model.datapoint_collection import DatapointCollection
+from napytau.util.model.value_error_pair import ValueErrorPair
+
 
 # Modes: "System" (standard), "Dark", "Light"
 customtkinter.set_appearance_mode("System")
@@ -29,9 +35,9 @@ class App(customtkinter.CTk):
         super().__init__()
 
         # Datapoints
-        self.datapoints: List[Tuple[float, float]] = []
-        self.datapoints_for_fitting: List[CheckboxDataPoint] = []
-        self.datapoints_for_calculation: List[CheckboxDataPoint] = []
+        self.datapoints: DatapointCollection = DatapointCollection([])
+        self.datapoints_for_fitting: DatapointCollection = DatapointCollection([])
+        self.datapoints_for_calculation: DatapointCollection = DatapointCollection([])
 
         # values
         self.tau = tk.IntVar()
@@ -49,15 +55,19 @@ class App(customtkinter.CTk):
         - Control area in row 1, column 1
         - Information area in row 2, column 0 to 1
         """
-        self.grid_rowconfigure((0, 2), weight=1)  # Three rows
-        self.grid_columnconfigure((0, 1), weight=1)  # Two columns
+        rows: int = 3
+        columns: int = 2
+
+
+        self.grid_rowconfigure((0, rows-1), weight=1)  # Three rows
+        self.grid_columnconfigure((0, columns-1), weight=1)  # Two columns
 
         # Weights are adjusted
-        self.grid_rowconfigure(0, weight=10)
+        self.grid_rowconfigure(0, weight=2)
         self.grid_rowconfigure(1, weight=1)
         self.grid_rowconfigure(2, weight=1)
-        self.grid_columnconfigure(0, weight=10)
-        self.grid_columnconfigure(1, weight=1)
+        self.grid_columnconfigure(0, weight=5)
+        self.grid_columnconfigure(1, weight=0)
 
         # Define menu bar callback functions
         menu_bar_callbacks = {
@@ -74,8 +84,7 @@ class App(customtkinter.CTk):
         # Initialize the menu bar
         self.menu_bar = MenuBar(self, menu_bar_callbacks)
 
-        # Initialize the graph
-        self.graph = Graph(self)
+
 
         # Initialize the checkbox panel
         self.checkbox_panel = CheckboxPanel(self)
@@ -84,18 +93,36 @@ class App(customtkinter.CTk):
         # TODO: Remove dummy points later on.
         self.update_data_checkboxes(
             [
-                (1.0, 5.23),
-                (2.0, 7.1),
-                (3.0, 0.44),
-                (4.0, 12.76),
-                (5.0, 5.0),
-                (6.0, 4.93),
-                (7.0, 2.7),
-                (8.0, 7.1),
-                (9.0, 9.52),
-                (10.0, 1.85),
+
+                create_dummy_datapoint(ValueErrorPair(1.0, 0.3),
+                                       ValueErrorPair(5.0, 1.0)),
+                create_dummy_datapoint(ValueErrorPair(2.0, 0.3),
+                                       ValueErrorPair(1.0, 2.0)),
+                create_dummy_datapoint(ValueErrorPair(3.0, 0.3),
+                                       ValueErrorPair(3.0, 3.0)),
+                create_dummy_datapoint(ValueErrorPair(4.0, 0.3),
+                                       ValueErrorPair(9.0, 4.0)),
+                create_dummy_datapoint(ValueErrorPair(5.0, 0.3),
+                                       ValueErrorPair(7.0, 5.0)),
+                create_dummy_datapoint(ValueErrorPair(6.0, 0.3),
+                                       ValueErrorPair(2.0, 6.0)),
+                create_dummy_datapoint(ValueErrorPair(7.0, 0.3),
+                                       ValueErrorPair(1.0, 7.0)),
+                create_dummy_datapoint(ValueErrorPair(8.0, 0.3),
+                                       ValueErrorPair(10.0, 8.0)),
+                create_dummy_datapoint(ValueErrorPair(9.0, 0.3),
+                                       ValueErrorPair(5.0, 9.0)),
+                create_dummy_datapoint(ValueErrorPair(10.0, 0.3),
+                                       ValueErrorPair(4.0, 10.0)),
+
+
             ]
         )
+
+        # Initialize the graph
+        self.graph: Graph = Graph(self)
+
+        self.toolbar: Toolbar = Toolbar(self, self.graph.canvas)
 
         # Initialize the control panel
         self.control_panel = ControlPanel(self)
@@ -147,6 +174,7 @@ class App(customtkinter.CTk):
 
         self.graph.update_plot()
 
+
     def select_number_of_polynomials(self) -> None:
         """
         Selects the number of polynomials to use.
@@ -168,23 +196,39 @@ class App(customtkinter.CTk):
         """
         print("select alpha calc mode " + self.menu_bar.alpha_calc_mode.get())
 
-    def update_data_checkboxes(self, new_datapoints: List[Tuple[float, float]]) -> None:
+    def update_data_checkboxes(self, new_datapoints: List[Datapoint]) -> None:
         """
         Updates the datapoint for the gui and updates both columns of the
         data checkboxes.
         Call this method if there are new datapoints.
         :param new_datapoints: The new list of datapoints.
         """
-        self.datapoints = new_datapoints.copy()
+        self.datapoints = DatapointCollection(new_datapoints)
 
         for point in new_datapoints:
-            self.datapoints_for_fitting.append(CheckboxDataPoint(point, True))
-            self.datapoints_for_calculation.append(CheckboxDataPoint(point, True))
+            self.datapoints_for_fitting.add_datapoint(point)
+            self.datapoints_for_calculation.add_datapoint(point)
 
         self.checkbox_panel.update_data_checkboxes_fitting()
         self.checkbox_panel.update_data_checkboxes_calculation()
 
 
+
+"""
+Function for testing purposes only!
+"""
+
+def create_dummy_datapoint(distance: ValueErrorPair,
+                           shifted_intensity: ValueErrorPair
+                           ) -> Datapoint:
+
+    datapoint = Datapoint(distance)
+    datapoint.shifted_intensity = shifted_intensity
+    datapoint.unshifted_intensity = ValueErrorPair(0.0,0.0)
+    return datapoint
+
+
 def init(cli_arguments: CLIArguments) -> None:
     app = App()
     app.mainloop()
+
