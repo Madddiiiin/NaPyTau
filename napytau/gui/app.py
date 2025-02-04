@@ -135,7 +135,7 @@ class App(customtkinter.CTk):
         self.control_panel = ControlPanel(self)
 
         # Initialize the logger
-        self.logger = Logger(self)
+        self.logger:Logger = Logger(self)
 
     def open_file(self) -> None:
         """
@@ -230,14 +230,12 @@ class App(customtkinter.CTk):
         self.checkbox_panel.update_data_checkboxes_calculation()
 
 
-"""
-Function for testing purposes only!
-"""
-
-
 def create_dummy_datapoint(
     distance: ValueErrorPair, shifted_intensity: ValueErrorPair
 ) -> Datapoint:
+    """
+    Function for testing purposes only!
+    """
     datapoint = Datapoint(distance)
     datapoint.shifted_intensity = shifted_intensity
     datapoint.unshifted_intensity = ValueErrorPair(0.0, 0.0)
