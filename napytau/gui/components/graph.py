@@ -7,7 +7,7 @@ import customtkinter
 from typing import TYPE_CHECKING
 import numpy as np
 
-from napytau.gui.components.Toolbar import Toolbar
+from napytau.gui.components.toolbar import Toolbar
 from napytau.gui.model.color import Color
 from napytau.gui.model.marker_factory import generate_marker
 from napytau.gui.model.marker_factory import generate_error_marker_path
@@ -24,7 +24,7 @@ class Graph:
         self.parent = parent
         self.graph_frame = self.plot(customtkinter.get_appearance_mode())
         self.graph_frame.grid(
-            row=0, column=0, rowspan=2, padx=(10, 10), pady=(10, 0), sticky="nsew"
+            row=1, column=0, rowspan=2, padx=(10, 10), pady=(10, 0), sticky="nsew"
         )
         self.graph_frame.grid_propagate(False)
 
@@ -76,7 +76,7 @@ class Graph:
         """
         self.graph_frame = self.plot(customtkinter.get_appearance_mode())
         self.graph_frame.grid(
-            row=0, column=0, rowspan=2, padx=(10, 10), pady=(10, 0), sticky="nsew"
+            row=1, column=0, rowspan=2, padx=(10, 10), pady=(10, 0), sticky="nsew"
         )
         self.graph_frame.grid_propagate(False)
         self.parent.toolbar = Toolbar(self.parent, self.canvas)
