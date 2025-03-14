@@ -23,6 +23,13 @@ def _get_dataset_stub(datapoints: DatapointCollection) -> DataSet:
     )
 
 
+def _get_dataset_stub(datapoints: DatapointCollection) -> DataSet:
+    return DataSet(
+        ValueErrorPair(RelativeVelocity(random()), RelativeVelocity(random())),
+        datapoints,
+    )
+
+
 class TauUnitTest(unittest.TestCase):
     def test_CanCalculateTau(self):
         """Can calculate tau"""
