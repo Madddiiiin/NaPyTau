@@ -15,8 +15,8 @@ def main() -> None:
 
         ## create a new git tag
 
-        os.system(f"git tag {version}")
-        os.system(f"git push origin {version}")
+        os.system(f"git tag v{version}")
+        os.system(f"git push origin v{version}")
 
         print(f"Done! Tagged version {version}!")
 
