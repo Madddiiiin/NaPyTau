@@ -5,11 +5,10 @@ from typing import List, Callable
 from re import match as regex_match
 from re import Pattern
 
-from napytau.import_export.crawler.crawler import Crawler
 from napytau.import_export.import_export_error import ImportExportError
 
 
-class FileCrawler[T](Crawler[PurePath, T]):
+class FileCrawler[T]:
     """
     The FileCrawler crawls files from a directory tree. Starting from a base directory,
     it searches for files with names specified in the needles list.
