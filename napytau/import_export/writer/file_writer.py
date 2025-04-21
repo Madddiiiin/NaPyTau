@@ -1,9 +1,7 @@
 from pathlib import PurePath
 
-from napytau.import_export.writer.writer import Writer
 
-
-class FileWriter(Writer[PurePath]):
+class FileWriter:
     @staticmethod
     def write_rows(file_path: PurePath, rows: list[str]) -> None:
         with open(file_path, "w") as file:
